@@ -3,23 +3,13 @@ import {Text, StyleSheet, View, Image,Alert } from 'react-native';
 import { Input } from '@/components/Input';
 import { Button } from '@/components/Button';
 import { Envelope, Key } from 'phosphor-react-native';
+import { useForm, Controller } from 'react-hook-form';
 
 export default function HomeScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  
-  function handleEmailChange (text: string){
-    console.log('E-mail:', text);
-    setEmail(text);
-  };
+  const { control, handleSubmit, formState: { errors } } = useForm();
 
-  function handleLogin() {
-    if (!email || !password) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
-      return;
-    }
-    // Lógica de autenticação aqui
-    Alert.alert('Sucesso', 'Login realizado com sucesso.');
+  function onSubmit ( data: any ) {
+    Alert.alert('Sucesso', `Login realizado com sucesso.\nE-mail: ${data.email}\nSenha: ${data.password}`);
   };
 
   return (
@@ -30,16 +20,43 @@ export default function HomeScreen() {
           style={styles.reactLogo}
         />
         <Text style={styles.textTitle} >Acesse sua conta</Text>
-        <Input placeholder='E-mail' 
-            onChangeText={handleEmailChange}
-            icon={<Envelope color="#7C7C8A" size={24} />}
-         />
-        <Input placeholder='Senha' 
-           onChangeText={setPassword}
-          icon={<Key color="#7C7C8A" size={24} />}
-        />
         
-        <Button />
+        <Controller
+          control={control}
+          name="email"
+          rules={{ required: 'E-mail é obrigatório.' }}
+          render={({ field: { onChange, onBlur, value } }) => (
+              <Input
+                placeholder='E-mail'
+                onChangeText={onChange}
+                onBlur={onBlur}
+                value={value}
+                icon={<Envelope color="#7C7C8A" size={24} />}
+              />
+        )}
+      />  
+      {errors.email && <Text>{errors.email.message as string}</Text>}
+      
+
+        <Controller
+          control={control}
+          name="password"
+          rules={{ required: 'Senha é obrigatória.' }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Input
+              placeholder='Senha'
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+              icon={<Key color="#7C7C8A" size={24} />}
+            />
+          )}
+        />
+        {errors.password && <Text>{errors.password.message as string}</Text>}
+        
+        <Button title='Entrar' onPress={handleSubmit(onSubmit)} />
+
+
 
    </View>
   );
